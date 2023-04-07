@@ -47,14 +47,19 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		if (location.hostname === "rtc.ninja"){
 			try {
 				if (session.label === false) {
-					document.title = "";
-				}
+					document.title = "RTC.Ninja";
+				} 
 				getById("qos").innerHTML = "";
 				getById("logoname").innerHTML = "";
 				getById("helpbutton").style.display = "none";
 				getById("helpbutton").style.opacity = 0;
 				getById("reportbutton").style.display = "none";
 				getById("reportbutton").style.opacity = 0;
+				getById("dropButton").classList.add("hidden");
+				getById("container-4").classList.add("hidden");
+				if (!(urlParams.has('screenshare') || urlParams.has('ss'))){
+					getById("container-2").classList.add("hidden");
+				}
 				//getById("mainmenu").style.opacity = 1;
 				getById("mainmenu").style.margin = "30px 0";
 				getById("translateButton").style.display = "none";
@@ -63,15 +68,15 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 				getById("info").style.opacity = 0;
 				getById("chatBody").innerHTML = "";
 			} catch (e) {}
+		} else if (session.label === false) {
+			document.title = location.hostname;
 		}
 		try {
 			if (ln_template===false){
 				changeLg("blank");
 			}
 			//getById("mainmenu").style.opacity = 1;
-			if (session.label === false) {
-				document.title = location.hostname;
-			}
+			
 			getById("qos").innerHTML = '<i class="las la-plug"></i>'
 			getById("logoname").innerHTML = getById("qos").outerHTML;
 			getById("helpbutton").style.display = "none";
@@ -276,6 +281,53 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		}
 	}
 	
+	if (urlParams.has('whip') || urlParams.has('whipview')) {
+		session.whipView = urlParams.get('whip') || urlParams.get('whipview') || false;
+		if (session.whipView){
+			setTimeout(function(){whipClient();},1000); 
+		}
+	}
+	
+	if (urlParams.has('whippush')) { // URL or data:base64 image. Becomes local to this viewer only.  This is like &avatar, but slightly different. Just CSS in this case
+		if (urlParams.get('whippush')){
+			try {
+				session.whipOutput = decodeURIComponent(urlParams.get('whippush'));
+			} catch(e){
+				errorlog(e);
+			}
+		}
+	}
+	if (urlParams.has('whippushtoken')) { // URL or data:base64 image. Becomes local to this viewer only.  This is like &avatar, but slightly different. Just CSS in this case
+		if (urlParams.get('whippushtoken')){
+			try {
+				session.whipOutputToken = urlParams.get('whippushtoken');
+			} catch(e){
+				errorlog(e);
+			}
+		}
+	}
+	if (urlParams.has('whepplay')) { // URL or data:base64 image. Becomes local to this viewer only.  This is like &avatar, but slightly different. Just CSS in this case
+		if (urlParams.get('whepplay')){
+			try {
+				session.whepInput = decodeURIComponent(urlParams.get('whepplay'));
+				if (session.whepInput){
+					setTimeout(function(){whepIn();},1000); 
+				}
+			} catch(e){
+				errorlog(e);
+			}
+		}
+	}
+	if (urlParams.has('whepplaytoken')) { // URL or data:base64 image. Becomes local to this viewer only.  This is like &avatar, but slightly different. Just CSS in this case
+		if (urlParams.get('whepplaytoken')){
+			try {
+				session.whepInputToken = urlParams.get('whepplaytoken')
+			} catch(e){
+				errorlog(e);
+			}
+		}
+	}
+	
 	if (urlParams.has('nomouseevents') || urlParams.has('nme')) {
 		session.disableMouseEvents = true;
 	}
@@ -321,9 +373,12 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		session.audioEffects = false; // disable audio inbound effects also.
 		session.audioMeterGuest = false;
 		window.addEventListener('resize', function() {  // Safari is the new IE.
-			var msg = {};
-			msg.requestSceneUpdate = true;
-			session.sendMessage(msg);
+		
+			if (session.ws){
+				var msg = {};
+				msg.requestSceneUpdate = true;
+				session.sendMessage(msg);
+			}
 			
 			if ( window.matchMedia("(orientation: portrait)").matches ) {
 				document.getElementsByTagName("html")[0].style.height = "100vh";
@@ -400,9 +455,9 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 			session.showList = true;
 		}
 	}
-	if (session.showList===true){
-		getById("hideusers").classList.add("hidden");
-	}
+	//if (session.showList===true){
+	//	getById("hideusers").classList.add("hidden");
+	//}
 	
 	if (urlParams.has('meshcast')) {
 		session.meshcast = urlParams.get('meshcast') || "any";
@@ -495,6 +550,10 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 			return sanitizeRoomName(e);
 		});
 		getById("rooms").classList.remove('hidden');
+	}
+	
+	if (urlParams.has('leaveorientationflag')) {
+		session.removeOrientationFlag = false; // leave `a=extmap:3 urn:3gpp:video-orientation\r\n` alone
 	}
 
 	if (urlParams.has('showdirector') || urlParams.has('sd')) {
@@ -1400,6 +1459,7 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 			}
 		}
 	}
+	
 
 	if (urlParams.has('transparent') || urlParams.has('transparency')) { // sets the window to be transparent - useful for IFRAMES?
 		session.transparent=true;
@@ -2181,6 +2241,7 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		} else if (session.videoDevice) {
 			session.videoDevice = session.videoDevice.toLowerCase().replace(/[\W]+/g, "_");
 		}
+		
 		if (session.videoDevice == "false") {
 			session.videoDevice = 0;
 		} else if (session.videoDevice == "0") {
@@ -2203,10 +2264,7 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 			session.videoDevice = 1;
 		} else if (session.videoDevice == "default") {
 			session.videoDevice = 1;
-		} else {
-			// whatever the user entered I guess, santitized.
-			session.videoDevice = session.videoDevice.replace(/[\W]+/g, "_").toLowerCase();
-		}
+		} 
 		
 		if (!urlParams.has('vdo')){
 			getById("videoMenu").style.display = "none";
@@ -2222,9 +2280,9 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 
 		if (session.audioDevice === null) {
 			session.audioDevice = "1";
-		} //else if (session.audioDevice) {
-		//	session.audioDevice = session.audioDevice.toLowerCase().replace(/[\W]+/g, "_");
-		//}
+		} else if (session.audioDevice) {
+			session.audioDevice = session.audioDevice.toLowerCase().replace(/[^-,'A-Za-z0-9]+/g,"_");
+		}
  
 		if (session.audioDevice == "false") {
 			session.audioDevice = 0;
@@ -2243,15 +2301,11 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		} else if (session.audioDevice == "ndi") {
 			session.audioDevice = ["line_newtek_ndi_audio"];
 		} else {
-			// whatever the user entered I guess
 			session.audioDevice = session.audioDevice.split(",");
-			for (var i =0;i<session.audioDevice.length;i++){
-				session.audioDevice[i] = session.audioDevice[i].replace(/[\W]+/g, "_").toLowerCase();
-				log("session.audioDevice:" + session.audioDevice[i]);
-			}
 		}
 		getById("headphonesDiv").style.display = "none";
 		getById("headphonesDiv2").style.display = "none";
+		
 		if (typeof session.audioDevice !== "object"){
 			getById("audioMenu").style.display = "none";	
 			getById("audioScreenShare1").style.display = "none";
@@ -2437,9 +2491,15 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 	}
 	
 	if (urlParams.has('chunked')) {
-		session.chunked = parseInt(urlParams.get('chunked')) || 2500;
-		session.alpha = true;
+		session.chunked = parseInt(urlParams.get('chunked')) || 2500; // sender side; enables to allows.
+		// session.alpha = true;
 	}
+	if (urlParams.has('nochunk') || urlParams.has('nochunked')) { // viewer side
+		session.nochunk = true;
+	}
+	//if (urlParams.has('viewchunked') || urlParams.has('viewchunk') || urlParams.has('allowchunked') || urlParams.has('allowchunk')) { // viewer side
+	//	session.forceChunked = true;
+	//}
 	
 	if (urlParams.has('token')) {
 		session.token = urlParams.get('token') || false;
@@ -2536,17 +2596,31 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		session.screenshareContentHint = urlParams.get('screensharecontenthint') || urlParams.get('sscontenthint') || urlParams.get('screensharecontenttype') || urlParams.get('sscontent') || urlParams.get('sshint') || "detail";
 	}
 
-
-	if (urlParams.has('codec')) {
-		log("CODEC CHANGED");
-		session.codec = urlParams.get('codec') || false;
-		if (session.codec){
-			session.codec = session.codec.toLowerCase();
+	if (urlParams.has('codec') || urlParams.has('codecs') || urlParams.has('videocodec')) {
+		log("codecs CHANGED");
+		session.codecs = urlParams.get('codec') || urlParams.get('codecs') || urlParams.get('videocodec') || false;
+		if (session.codecs){
+			session.codecs = session.codecs.toLowerCase();
+			session.codecs = session.codecs.split(",");
+			if (session.codecs.length){
+				session.codec = session.codecs.shift();
+				if (!session.codec){
+					session.codec = false;
+					session.codecs = false;
+				}
+				if (!session.codecs.length){
+					session.codecs = false;
+				}
+			} else {
+				session.codecs = false;
+			}
 		}
 	} else if (OperaGx){
 		session.codec = "vp8";
 		warnlog("Defaulting to VP8 manually, as H264 with remote iOS devices is not supported");
 	}
+	
+	
 	
 	if (urlParams.has('audiocodec')) {
 		log("CODEC CHANGED");
@@ -3596,24 +3670,38 @@ async function main(){ // main asyncronous thread; mostly initializes the user s
 		}
 	}
 	
-	if (urlParams.has('whip')) {
-		session.whip = urlParams.get('whip') || false;
-		if (session.whip){
-			setTimeout(function(){whipClient();},1000); // OBS v29 required?
+	if (urlParams.has('postapi') || urlParams.has('posturl')) {
+		session.postApi = urlParams.get('postapi') || urlParams.get('posturl') || false; // ie: &postapi=https%3A%2F%2Fwebhook.site%2Fb190f5bf-e4f8-454a-bd51-78b5807df9c1
+		if (session.postApi){
+			try {
+				session.postApi = decodeURI(session.postApi) || session.postApi ; // needs to be SSL enabled.
+			} catch(e){
+				console.error(e);
+			}
 		}
 	}
 
 	if (urlParams.has('queue')) {
 		session.queue = true;
 	}
+	
+	
 
 	if (urlParams.has('push') || urlParams.has('id') || urlParams.has('permaid') ) {
 		session.permaid = urlParams.get('push')  || urlParams.get('id') || urlParams.get('permaid');
-
+		
 		if (session.permaid) {
-			session.streamID = sanitizeStreamID(session.permaid);
+			session.permaid = sanitizeStreamID(session.permaid) || null;
+			session.streamID = session.permaid || session.streamID;
+		} else if (urlParams.has('permaid') && getStorage("permaid")){
+			session.streamID = sanitizeStreamID(getStorage("permaid")) || session.streamID;
+			session.permaid = null;
 		} else {
 			session.permaid = null;
+		}
+		
+		if (urlParams.has('permaid')){
+			setStorage("permaid", session.streamID, 99999)
 		}
 		
 		if (urlParams.has('push')){

@@ -28,13 +28,13 @@
 		<meta name="license" content="https://github.com/steveseguin/vdo.ninja/LICENSE.md" />
 		<meta name="sourcecode" content="https://github.com/steveseguin/vdo.ninja" />
 		<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
-		<link rel="icon" type="image/png" sizes="32x32" href="./media/favicon-32x32.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="./media/favicon-16x16.png" />
-		<link rel="icon" href="./media/favicon.ico" />
-		<link itemprop="thumbnailUrl" href="./media/vdoNinja_logo_full.png" />
+		<link id="favicon1" rel="icon" type="image/png" sizes="32x32" href="./media/favicon-32x32.png" />
+		<link id="favicon2" rel="icon" type="image/png" sizes="16x16" href="./media/favicon-16x16.png" />
+		<link id="favicon3" rel="icon" href="./media/favicon.ico" />
+		<link id="thumbnailUrl" itemprop="thumbnailUrl" href="./media/vdoNinja_logo_full.png" />
 		<!-- Primary Meta Tags -->
 		<title>VDO.Ninja</title>
-		<meta name="title" content="VDO.Ninja" />
+		<meta id="metaTitle" name="title" content="VDO.Ninja" />
 		<meta name="description" content="Bring live video from your smartphone, computer, or friends directly into your Studio. 100% free." />
 		<meta name="author" content="Steve Seguin" />
 		<!-- Open Graph / Facebook -->
@@ -56,7 +56,7 @@
 		<meta property="twitter:image" content="./media/vdoNinja_logo_full.png" />
 		<meta name="msapplication-TileColor" content="#da532c" />
 		<meta name="theme-color" content="#ffffff" />
-		<link rel="stylesheet" href="./main.css?ver=271" />
+		<link rel="stylesheet" href="./main.css?ver=278" />
 		<script type="text/javascript" crossorigin="anonymous" src="./thirdparty/adapter.js"></script>
 		<style id="lightbox-animations" type="text/css"></style>
 		<!-- <link rel="manifest" href="manifest.json" /> -->
@@ -81,9 +81,9 @@
 			<link itemprop="url" href="./media/vdoNinja_logo_full.png" />
 		</span>
 		
-		<script type="text/javascript" crossorigin="anonymous"  src="./thirdparty/CodecsHandler.js?ver=45"></script>
+		<script type="text/javascript" crossorigin="anonymous"  src="./thirdparty/CodecsHandler.js?ver=47"></script>
 		<script type="text/javascript" crossorigin="anonymous" src="./thirdparty/aes.js"></script>
-		<script type="text/javascript" crossorigin="anonymous" src="./webrtc.js?ver=581"></script>
+		<script type="text/javascript" crossorigin="anonymous" src="./webrtc.js?ver=606"></script>
 		<input id="zoomSlider" type="range" style="display: none;" />
 		<span id="electronDragZone" style="pointer-events: none; z-index:-10; position:absolute;top:0;left:0;width:100%;height:2%;-webkit-app-region: drag;min-height:20px;"></span>
 		<div id="header">
@@ -130,7 +130,7 @@
 			</div>
 			<div id="head6" class="hidden" data-translate="only-director-can-hear-you">Only the director can hear you currently.</div>
 			<div id="head7" class="hidden" data-translate="director-muted-you">The director has muted you.</div>
-			
+			<div id="head8" class="hidden" data-translate="director-video-muted-you">The director has disabled your camera temporarily.</div>
 		</div>
 		<div id="controlButtons" class="hidden">
 			<div id="obsState" class="hidden" >ACTIVE</div>
@@ -228,28 +228,34 @@
 				</div>
 			</div>
 		</div>
-		<span
-				id="reportbutton"
-				title="Submit any error logs" 
-				onclick="submitDebugLog();"
-				style="cursor: pointer; visibility: hidden; display:none;z-index:3;"
-			>
-			<i style="float: right; bottom: 0px; cursor: pointer; position: fixed; right: 55px; color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-bug" aria-hidden="true"></i>
-		</span>
-		<span
-				id="helpbutton"
-				title="Show Help Info" 
-				onclick="warnUser('For support, please browse https://reddit.com/r/vdoninja or join the live chat on Discord at https://discord.vdo.ninja.\n\nThe Docs also contains many help guides and advanced settings, located at https://docs.vdo.ninja.\n\nTo access the video stats menu, hold CTRL (command) and Left-Click on a video. Most video issues can be fixed by using Wired Internet instead of Wi-Fi.')"
-				style="cursor: pointer; display:none;"
-				alt="How to Use This with OBS"
-			>
-			<i style="float: right; bottom: 0px; cursor: pointer; position: fixed; right: 33px; color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-question-circle" aria-hidden="true"></i>
-		</span>
-		<span title="Language Options" onclick="toggle(document.getElementById('languages'));" aria-label="language options" aria-pressed="false" id="translateButton">
-			<i style="float: right; bottom: 0px; cursor: pointer; position: fixed; right:  10px; color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-language" aria-hidden="true"></i>
-		</span>
-		<span title="Add to Calendar" onclick="toggle(document.getElementById('calendar'));" id="calendarButton">
-			<i style="float: right; bottom: 0px; cursor: pointer; position: fixed; right:  33px; color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-calendar" aria-hidden="true"></i>
+		<span id="miniTaskBar" style="float: right; bottom: 0px;right:0; position:fixed; display:flex;">
+			<div id="closedList_connectUsers" class="hidden"  onclick="getById('connectUsers').classList.remove('hidden');getById('closedList_connectUsers').classList.add('hidden');">
+				<i class="las la-theater-masks"></i>
+			</div>
+			<span
+					id="reportbutton"
+					title="Submit any error logs" 
+					onclick="submitDebugLog();"
+					style="cursor: pointer; display:none;z-index:3;"
+					class="hidden"
+				>
+				<i style="cursor: pointer; color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-bug" aria-hidden="true"></i>
+			</span>
+			<span
+					id="helpbutton"
+					title="Show Help Info" 
+					onclick="warnUser('For support, please browse https://reddit.com/r/vdoninja or join the live chat on Discord at https://discord.vdo.ninja.\n\nThe Docs also contains many help guides and advanced settings, located at https://docs.vdo.ninja.\n\nTo access the video stats menu, hold CTRL (command) and Left-Click on a video. Most video issues can be fixed by using Wired Internet instead of Wi-Fi.')"
+					style="cursor: pointer; display:none;"
+					alt="How to Use This with OBS"
+				>
+				<i style="cursor: pointer;  color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-question-circle" aria-hidden="true"></i>
+			</span>
+			<span title="Language Options" onclick="toggle(document.getElementById('languages'));" aria-label="language options" aria-pressed="false" id="translateButton">
+				<i style="cursor: pointer;color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-language" aria-hidden="true"></i>
+			</span>
+			<span title="Add to Calendar" onclick="toggle(document.getElementById('calendar'));" id="calendarButton">
+				<i style="cursor: pointer;  color: #d9e4eb; padding: 2px; margin: 2px 2px 0 0; font-size: 140%;" class="las la-calendar" aria-hidden="true"></i>
+			</span>
 		</span>
 		<div id="mainmenu" class="row" style="opacity: 0;">
 			
@@ -327,14 +333,15 @@
 								<b>
 									<span data-translate="default-codec-select" title="Which video codec would you want used by default?" >Preferred Video Codec:  </span> 
 									<select style="font-size:1.1em" id="codecGroupFlag" type="checkbox" title="For large group rooms, this option can reduce the load on remote guests substantially" >
-									<option value="default" selected>Default</option>
-									<option value="vp9">VP9</option>
-									<option value="h264">H264</option>
-									<option value="vp8">VP8</option>
-									<option value="av1">AV1</option>
-								</select >
+										<option value="default" selected>Default</option>
+										<option value="vp9">VP9</option>
+										<option value="h264">H264</option>
+										<option value="vp8">VP8</option>
+										<option value="av1">AV1</option>
+									</select >
 								</b>
-							</th>	
+							</th>
+							
 						</tr>
 						</table>
 						
@@ -1379,7 +1386,7 @@
 						<span data-translate="voice-chat">Solo Talk</span>
 					</button>
 
-					<button data-action-type="solo-video" class="btn-HL-yellow advanced" title="Solo this video everywhere" onclick="requestInfocus(this);">
+					<button data-action-type="solo-video" class="btn-HL-yellow advanced" title="Solo this video everywhere. (Hold CTRL/CMD to just make video larger)" onclick="requestInfocus(this, event);">
 						<i class="las la-user"></i>
 						<span data-translate="solo-video">Highlight guest</span>
 					</button>
@@ -1421,35 +1428,32 @@
 
 					<!-- Row of Scenes -->
 					<div class="row four advanced">
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="2" title="Add to Scene 2" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="2" title="Add to Scene 2" onclick="directEnable(this, event);">
 							<span>S2</span>
 						</button>
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="3" title="Add to Scene 3" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="3" title="Add to Scene 3" onclick="directEnable(this, event);">
 							<span>S3</span>
 						</button>
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="4" title="Add to Scene 4" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="4" title="Add to Scene 4" onclick="directEnable(this, event);">
 							<span>S4</span>
 						</button>
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="5" title="Add to Scene 5" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="5" title="Add to Scene 5" onclick="directEnable(this, event);">
 							<span>S5</span>
 						</button>
 
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="6" title="Add to Scene 6" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="6" title="Add to Scene 6" onclick="directEnable(this, event);">
 							<span>S6</span>
 						</button>
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="7" title="Add to Scene 7" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="7" title="Add to Scene 7" onclick="directEnable(this, event);">
 							<span>S7</span>
 						</button>
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="8" title="Add to Scene 8" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="8" title="Add to Scene 8" onclick="directEnable(this, event);">
 							<span>S8</span>
 						</button>
-						<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="9" title="Add to Scene 9" onclick="directEnable(this, event);">
+						<button class="btn-HL-peach" data-action-type="addToScene" data-scene="9" title="Add to Scene 9" onclick="directEnable(this, event);">
 							<span>S9</span>
 						</button>
 					</div>
-					
-					<span class="spacer"></span>
-
 				</div>
 				
 
@@ -1476,9 +1480,13 @@
 				<div class="group hidden" data-cluster="2">
 					<!-- General Controls -->
 					<div class="row two">
-						<button data-action-type="hide-guest" title="Hide this guest everywhere" onclick="remoteMuteVideo(this, event);">
-							<i class="las la-video-slash"></i>
+						<button data-action-type="hide-guest" title="Hide this guest everywhere" onclick="remoteHideVideo(this, event);">
+							<i class="las la-user-slash"></i>
 							<span data-translate="hide-guest">hide guest</span>
+						</button>
+						<button data-action-type="mute-video-guest" title="Disable this guest's video track" onclick="remoteMuteVideo(this, event);">
+							<i class="las la-video-slash"></i>
+							<span data-translate="mute-video-guest">disable video</span>
 						</button>
 						<button class="mainonly" data-action-type="toggle-remote-speaker" title="Toggle the remote guest's speaker output" onclick="remoteSpeakerMute(this, event);">
 							<i class="las la-volume-off"></i> <span data-translate="toggle-remote-speaker">Deafen Guest</span>
@@ -1519,49 +1527,47 @@
 					
 					<!-- Row of Channels -->
 					<div class="row six advanced">
-						<button class="btn-HL-blue center" data-action-type="add-channel" title="Set to Audio Channel 1" onclick="changeChannelOffset(this.dataset.UUID, 0);">
+						<button class="btn-HL-blue" data-action-type="add-channel" title="Set to Audio Channel 1" onclick="changeChannelOffset(this.dataset.UUID, 0);">
 							<span>C1</span>
 						</button>
-						<button class="btn-HL-blue center" data-action-type="add-channel" title="Set to Audio Channel 2" onclick="changeChannelOffset(this.dataset.UUID, 1);">
+						<button class="btn-HL-blue" data-action-type="add-channel" title="Set to Audio Channel 2" onclick="changeChannelOffset(this.dataset.UUID, 1);">
 							<span>C2</span>
 						</button>
-						<button class="btn-HL-blue center" data-action-type="add-channel" title="Set to Audio Channel 3" onclick="changeChannelOffset(this.dataset.UUID, 2);">
+						<button class="btn-HL-blue" data-action-type="add-channel" title="Set to Audio Channel 3" onclick="changeChannelOffset(this.dataset.UUID, 2);">
 							<span>C3</span>
 						</button>
-						<button class="btn-HL-blue center" data-action-type="add-channel" title="Set to Audio Channel 4" onclick="changeChannelOffset(this.dataset.UUID,3);">
+						<button class="btn-HL-blue" data-action-type="add-channel" title="Set to Audio Channel 4" onclick="changeChannelOffset(this.dataset.UUID,3);">
 							<span>C4</span>
 						</button>
-						<button class="btn-HL-blue center" data-action-type="add-channel" title="Set to Audio Channel 5" onclick="changeChannelOffset(this.dataset.UUID, 4);">
+						<button class="btn-HL-blue" data-action-type="add-channel" title="Set to Audio Channel 5" onclick="changeChannelOffset(this.dataset.UUID, 4);">
 							<span>C5</span>
 						</button>
-						<button class="btn-HL-blue center" data-action-type="add-channel" title="Set to Audio Channel 6" onclick="changeChannelOffset(this.dataset.UUID, 5);">
+						<button class="btn-HL-blue" data-action-type="add-channel" title="Set to Audio Channel 6" onclick="changeChannelOffset(this.dataset.UUID, 5);">
 							<span>C6</span>
 						</button>
 					</div>
 					
 					<!-- Row of Groups -->
 					<div class="row six advanced">
-						<button class="btn-HL-green center" data-action-type="toggle-group" data-group="1" title="Add/remove from group 1" onclick="changeGroup(this);">
+						<button class="btn-HL-green" data-action-type="toggle-group" data-group="1" title="Add/remove from group 1" onclick="changeGroup(this);">
 							<span>G1</span>
 						</button>
-						<button class="btn-HL-green center" data-action-type="toggle-group" data-group="2" title="Add/remove from group 2" onclick="changeGroup(this);">
+						<button class="btn-HL-green" data-action-type="toggle-group" data-group="2" title="Add/remove from group 2" onclick="changeGroup(this);">
 							<span>G2</span>
 						</button>
-						<button class="btn-HL-green center" data-action-type="toggle-group" data-group="3" title="Add/remove from group 3" onclick="changeGroup(this);">
+						<button class="btn-HL-green" data-action-type="toggle-group" data-group="3" title="Add/remove from group 3" onclick="changeGroup(this);">
 							<span>G3</span>
 						</button>
-						<button class="btn-HL-green center" data-action-type="toggle-group" data-group="4" title="Add/remove from group 4" onclick="changeGroup(this);">
+						<button class="btn-HL-green" data-action-type="toggle-group" data-group="4" title="Add/remove from group 4" onclick="changeGroup(this);">
 							<span>G4</span>
 						</button>
-						<button class="btn-HL-green center" data-action-type="toggle-group" data-group="5" title="Add/remove from group 5" onclick="changeGroup(this);">
+						<button class="btn-HL-green" data-action-type="toggle-group" data-group="5" title="Add/remove from group 5" onclick="changeGroup(this);">
 							<span>G5</span>
 						</button>
-						<button class="btn-HL-green center" data-action-type="toggle-group" data-group="6" title="Add/remove from group 6" onclick="changeGroup(this);">
+						<button class="btn-HL-green" data-action-type="toggle-group" data-group="6" title="Add/remove from group 6" onclick="changeGroup(this);">
 							<span>G6</span>
 						</button>
 					</div>
-
-					<span class="spacer"></span>
 
 					<!-- General Controls -->
 					<div class="row two">
@@ -1584,7 +1590,7 @@
 							<button class="center" data-action-type="change-quality1" title="Disable Video Preview" onclick="toggleQualityDirector(0, this.dataset.UUID, this);">
 								<i class="las la-video-slash"></i>
 							</button>
-							<button class="pressed center" data-action-type="change-quality2" title="Low-Quality Preview" onclick="toggleQualityDirector(50, this.dataset.UUID, this);">
+							<button class="pressed" data-action-type="change-quality2" title="Low-Quality Preview" onclick="toggleQualityDirector(50, this.dataset.UUID, this);">
 								<i class="las la-video"></i>
 							</button>
 							<button class="center" data-action-type="change-quality3" title="High-Quality Preview" onclick="toggleQualityDirector(1200, this.dataset.UUID, this);">
@@ -1592,8 +1598,6 @@
 							</button>
 						</div>
 					</div>
-
-					<span class="spacer big"></span>
 					 
 					<!-- Further Audio/Video Settings -->
 					<div class="row two" data-cluster="3">
@@ -1608,8 +1612,6 @@
 					</div>
 
 				</div>
-				
-				<span class="spacer"></span>
 			</div>
 		</div>
 		
@@ -1626,7 +1628,7 @@
 						<i class="las la-microphone-slash"></i>
 						<span data-translate="mute-scene">mute in scene</span>
 					</button>
-					<button data-action-type="solo-video" class="btn-HL-yellow" title="Solo this video everywhere" onclick="requestInfocus(this);">
+					<button data-action-type="solo-video" class="btn-HL-yellow" title="Solo this video everywhere. (Hold CTRL/CMD to just make video larger)" onclick="requestInfocus(this, event);">
 						<i class="las la-user"></i>
 						<span data-translate="solo-video-director">Highlight</span>
 					</button>
@@ -1639,50 +1641,48 @@
 				
 				<!-- Row of Scenes -->
 				<div class="row six advanced">
-					<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="2" title="Add to Scene 2" onclick="directEnable(this, event);">
+					<button class="btn-HL-peach" data-action-type="addToScene" data-scene="2" title="Add to Scene 2" onclick="directEnable(this, event);">
 						<span>S2</span>
 					</button>
-					<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="3" title="Add to Scene 3" onclick="directEnable(this, event);">
+					<button class="btn-HL-peach" data-action-type="addToScene" data-scene="3" title="Add to Scene 3" onclick="directEnable(this, event);">
 						<span>S3</span>
 					</button>
-					<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="4" title="Add to Scene 4" onclick="directEnable(this, event);">
+					<button class="btn-HL-peach" data-action-type="addToScene" data-scene="4" title="Add to Scene 4" onclick="directEnable(this, event);">
 						<span>S4</span>
 					</button>
-					<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="5" title="Add to Scene 5" onclick="directEnable(this, event);">
+					<button class="btn-HL-peach" data-action-type="addToScene" data-scene="5" title="Add to Scene 5" onclick="directEnable(this, event);">
 						<span>S5</span>
 					</button>
 
-					<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="6" title="Add to Scene 6" onclick="directEnable(this, event);">
+					<button class="btn-HL-peach" data-action-type="addToScene" data-scene="6" title="Add to Scene 6" onclick="directEnable(this, event);">
 						<span>S6</span>
 					</button>
-					<button class="btn-HL-peach center" data-action-type="addToScene" data-scene="7" title="Add to Scene 7" onclick="directEnable(this, event);">
+					<button class="btn-HL-peach" data-action-type="addToScene" data-scene="7" title="Add to Scene 7" onclick="directEnable(this, event);">
 						<span>S7</span>
 					</button>
 				</div>
 
 				<!-- Row of Groups -->
 				<div class="row six advanced">
-					<button class="btn-HL-green center" data-action-type="toggle-group" data-group="1" title="Add/remove from group 1" onclick="changeGroupDirector(this);">
+					<button class="btn-HL-green" data-action-type="toggle-group" data-group="1" title="Add/remove from group 1" onclick="changeGroupDirector(this);">
 						<span>G1</span>
 					</button>
-					<button class="btn-HL-green center" data-action-type="toggle-group" data-group="2" title="Add/remove from group 2" onclick="changeGroupDirector(this);">
+					<button class="btn-HL-green" data-action-type="toggle-group" data-group="2" title="Add/remove from group 2" onclick="changeGroupDirector(this);">
 						<span>G2</span>
 					</button>
-					<button class="btn-HL-green center" data-action-type="toggle-group" data-group="3" title="Add/remove from group 3" onclick="changeGroupDirector(this);">
+					<button class="btn-HL-green" data-action-type="toggle-group" data-group="3" title="Add/remove from group 3" onclick="changeGroupDirector(this);">
 						<span>G3</span>
 					</button>
-					<button class="btn-HL-green center" data-action-type="toggle-group" data-group="4" title="Add/remove from group 4" onclick="changeGroupDirector(this);">
+					<button class="btn-HL-green" data-action-type="toggle-group" data-group="4" title="Add/remove from group 4" onclick="changeGroupDirector(this);">
 						<span>G4</span>
 					</button>
-					<button class="btn-HL-green center" data-action-type="toggle-group" data-group="5" title="Add/remove from group 5" onclick="changeGroupDirector(this);">
+					<button class="btn-HL-green" data-action-type="toggle-group" data-group="5" title="Add/remove from group 5" onclick="changeGroupDirector(this);">
 						<span>G5</span>
 					</button>
-					<button class="btn-HL-green center" data-action-type="toggle-group" data-group="6" title="Add/remove from group 6" onclick="changeGroupDirector(this);">
+					<button class="btn-HL-green" data-action-type="toggle-group" data-group="6" title="Add/remove from group 6" onclick="changeGroupDirector(this);">
 						<span>G6</span>
 					</button>
 				</div>
-
-				<span class="spacer"></span>
 				
 				<!-- Mix Order Control -->
 				<span class="row three advanced" data-action-type="ordering">
@@ -1697,9 +1697,6 @@
 						<i class="las la-plus"></i>
 					</button>
 				</span>
-
-				<span class="spacer"></span>
-
 			</div>	
 		</div>
 		
@@ -1986,6 +1983,19 @@
 						<span data-translate="stop-record-to-disk">Stop Recording</span>
 					</a>
 				</li>
+				<li class="context-menu__item hidden">
+					<a href="#" class="context-menu__link" data-action="CopyFrameAsImage">
+						<i class="las la-external-link"></i>
+						<span data-translate="copy-to-clipboard-frame">Snapshot to clipboard</span>
+					</a>
+				</li>
+				<li class="context-menu__item hidden">
+					<a href="#" class="context-menu__link" data-action="SaveFrameToDisk">
+						<i class="las la-external-link"></i>
+						<span data-translate="save-current-frame">Save frame to disk</span>
+					</a>
+				</li>
+				
 				<li class="context-menu__item">
 					<a href="#" class="context-menu__link" data-action="ShowStats">
 						<i class="las la-external-link"></i>
@@ -2049,7 +2059,7 @@
 				<input id="trbSettingInput" type="range" min="0" max="4000" value="500" onchange="getById('trbSettingInputManual').value=this.value;changeTRB(this);" oninput="getById('trbSettingInputFeedback').innerHTML = this.value;" style="width:calc(100% - 60px);display:inline-block;" />
 				<input id="trbSettingInputManual" min="0" value="500" onchange="getById('trbSettingInput').value=this.value;changeTRB(this);" oninput="getById('trbSettingInputFeedback').innerHTML = this.value;" style="width:42px;display:inline-block;text-align: center;" />
 				
-				<span style="margin: 20px 0 0 0;display:block" id='highlightDirectorSpan' title="Only the director's video will be visible to guests and within group scenes">
+				<span style="margin: 20px 0 0 0;display:block" id='highlightDirectorSpan' title="Only the director's video will be visible to guests and within group scenes. (Hold CTRL/CMD to just make video larger)">
 					<input id="highlightDirector" style="width: 15px; height: 15px; margin:10px;" name="highlightDirector"  data-action-type="solo-video" type="checkbox" onchange="requestInfocus(this, event);" />
 					<label for="highlightDirector" data-translate="highlight-director-only-video-guests-will-see">Highlight Director (only video guests will see)</label> 
 				</span>
@@ -2233,11 +2243,12 @@
 
 		<div id="connectUsers">
 			<div style="margin-bottom:5px"><u ><span data-translate="invisible-guests">Not Visible</span></u> 
-			<span title="Hide this window" id='hideusers' style="cursor:pointer;font-size:1.2em; float: right;" onclick="session.showList=false;getById('connectUsers').style.display = 'none';"><i class="las la-times"></i></span></div>
+			<span title="Hide this window" id='hideusers' style="cursor:pointer;font-size:1.2em; float: right;" onclick="getById('connectUsers').classList.add('hidden');getById('closedList_connectUsers').classList.remove('hidden');"><i class="las la-times"></i></span></div>
 			<span style="height:5px;display:block;"></span>
 			<div id="userList">
 			</div>
 		</div>
+		
 		<div id="signalMeterTemplate" class="signal-meter hidden" data-cpu="0" data-level="0">
 			<i class="las la-signal"></i>
 			<i class="las la-fire-alt"></i>
@@ -2338,7 +2349,11 @@
 			</u>
 		</div>
 		<span class="hidden" id="hangupTemplate">
-			<span style='font-size:500%;text-align:center;margin:auto;'><a href="." title="Go to the homepage">👋</a></span>
+			<span style='font-size:500%;text-align:center;margin:auto;'>👋</span>
+		</span>
+		<span class="hidden" id="hangupTemplateMobileFullscreen">
+			<span style='font-size:500%;text-align:center;margin:auto;'>👋<br ><a onclick="history.go(0);" title="Reload the page" data-translate="reload-page">Reload Page</a>
+			</span>
 		</span>
 		<div id="meshcastMenu" class="hidden">
 			Meshcast publishing region: <select name="edgelist" id="edgelist" onchange="selectMeshcast(this);" title="Select a location that is closest to both you and your audience."></select>
@@ -2468,11 +2483,11 @@
 			// session.hidehome = true; // If used, 'hide home' will make the landing page inaccessible, along with hiding a few go-home elements.
 			// session.record = false; // uncomment to block users from being able to record via vdo.ninja's built in recording function
 		</script>
-		<script type="text/javascript" crossorigin="anonymous" id="lib-js" src="./lib.js?ver=673"></script>
+		<script type="text/javascript" crossorigin="anonymous" id="lib-js" src="./lib.js?ver=713"></script>
 		<!-- 
 		// If you wish to change branding, blank offers a good clean start.
 		<script type="text/javascript" id="main-js" src="./main.js" data-translation="blank"></script>
 		-->
-		<script type="text/javascript" crossorigin="anonymous" id="main-js" src="./main.js?ver=552"></script>
+		<script type="text/javascript" crossorigin="anonymous" id="main-js" src="./main.js?ver=575"></script>
 	</body>
 </html>
