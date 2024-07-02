@@ -3,7 +3,7 @@
 	<title>Comms app</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
-	<script src="./thirdparty/jquery/jquery-3.6.0.js?asdf"></script>
+	<script src="./thirdparty/jquery/jquery-3.6.0.js?v=2"></script>
     <script src="./thirdparty/jquery/jquery-ui.js"></script>
 	<link rel="stylesheet" href="./thirdparty/jquery/jquery-ui.css">
 	<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
@@ -1093,6 +1093,11 @@
 		mobile = true;
 	}
 	
+	var videoMode = false;
+	if (urlParams.has('video')){
+		videoMode = true;
+	}
+	
 	if (screen.height && screen.width && (screen.height*screen.width<400000)){
 		mobile = true;
 	}
@@ -1132,6 +1137,8 @@
 		roomname = urlParams.get("room") || urlParams.get("r") ||urlParams.get("dir") || urlParams.get("director");
 		roomname = sanitizeRoomName(roomname) || false;
 	}
+	
+	
 	
 	
 	function randomRoomName(){
@@ -1803,10 +1810,15 @@
 		var chatmsg = "Welcome to the Comms app. Select a group to participate in.";
 		chatmsg = encodeURIComponent(chatmsg);
 		
+		var vtype = "&vd=0";
+		if (videoMode){
+			vtype = "&ad=0";
+		}
+		
 		if (window.location.hostname == "comms.cam"){
-			var iframesrc = "https://vdo.ninja/?"+urlEdited+"&controlbarspace&volumecontrol&sharperscreen&groupmode&novice&ltb=350&minipreview&transparent&hideheader&margin&rounded&hidetranslate&cleandirector&vd=0&webcam&nvb&sstype=3&ssb&showlabel=toprounded&labelsize=85&style=2&room="+roomname+additional+additional2+"&b64css="+injectCSS+streamID+label+"&chatmsg="+chatmsg;
+			var iframesrc = "https://vdo.ninja/?"+urlEdited+vtype+"&controlbarspace&volumecontrol&sharperscreen&groupmode&novice&ltb=350&minipreview&transparent&hideheader&margin&rounded&hidetranslate&cleandirector&webcam&nvb&sstype=3&ssb&showlabel=toprounded&labelsize=85&style=2&room="+roomname+additional+additional2+"&b64css="+injectCSS+streamID+label+"&chatmsg="+chatmsg;
 		} else {
-			var iframesrc = "./index.html?"+urlEdited+"&controlbarspace&volumecontrol&sharperscreen&groupmode&novice&ltb=350&minipreview&transparent&hideheader&margin&rounded&hidetranslate&cleandirector&vd=0&webcam&nvb&sstype=3&ssb&showlabel=toprounded&labelsize=85&style=2&room="+roomname+additional+additional2+"&b64css="+injectCSS+streamID+label+"&chatmsg="+chatmsg;
+			var iframesrc = "./index.html?"+urlEdited+vtype+"&controlbarspace&volumecontrol&sharperscreen&groupmode&novice&ltb=350&minipreview&transparent&hideheader&margin&rounded&hidetranslate&cleandirector&webcam&nvb&sstype=3&ssb&showlabel=toprounded&labelsize=85&style=2&room="+roomname+additional+additional2+"&b64css="+injectCSS+streamID+label+"&chatmsg="+chatmsg;
 		}
 		
 		
@@ -1826,6 +1838,14 @@
 		
 		iframe.onload = function(){
 			iframe.contentWindow.postMessage({ groups: savedSession.activeGroups ,  groupView: savedSession.activeViewGroups }, "*"); 
+		}
+		
+		var params = window.location.search || "";
+		if (params.startsWith("?")){
+			params = params.slice(1);
+			iframesrc = iframesrc + "&" + params
+		} else {
+			iframesrc = iframesrc + params
 		}
 		
 		iframe.src = iframesrc;
